@@ -5,7 +5,6 @@
 //
 
 import SwiftUI
-import AuthenticationServices
 
 struct ContentView: View {
     @State private var playerName = ""
@@ -16,7 +15,6 @@ struct ContentView: View {
     @State private var isGameOver = false
     @State private var userScore: Float = 0.0
     @State private var bestScore: Int = 0
-    @State private var appleSignInDelegated: Bool = false
     
     @Environment(\.managedObjectContext) var managedObjectContext
     
@@ -55,25 +53,9 @@ struct ContentView: View {
     
     private var inputSection: some View {
         Group {
-            HStack {
-                TextField("Name", text: $playerName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                Button("Confirm") {
-                    if !playerName.isEmpty {
-                        appleSignInDelegated = true
-                    }
-                }
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            }
-            
-            if !appleSignInDelegated {
-                SignInWithAppleButton(.continue, onRequest: requestAppleID, onCompletion: handleAppleIDRequest)
-                    .frame(height: 45)
-                    .padding()
-            }
+            Text("Enter your name:")
+            TextField("Name", text: $playerName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
             
             Text("Enter your guess:")
             TextField("Guess", text: $guess)
@@ -86,26 +68,6 @@ struct ContentView: View {
                 .cornerRadius(10)
         }
     }
-    
-    func requestAppleID(request: ASAuthorizationAppleIDRequest) {
-        request.requestedScopes = [.fullName]
-    }
-    
-    func handleAppleIDRequest(result: Result<ASAuthorization, Error>) {
-        switch result {
-        case .success(let authResults):
-            guard let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential, let name = appleIDCredential.fullName?.givenName else {
-                return
-            }
-            playerName = name
-            appleSignInDelegated = true
-            
-        case .failure(let error):
-            print("Authentication error: \(error.localizedDescription)")
-            appleSignInDelegated = false
-        }
-    }
-    
     
     private var feedbackSection: some View {
         VStack {
@@ -182,12 +144,10 @@ struct ContentView: View {
     
     func newGame() {
         NumberGuesserGame.newGame(playerName: &playerName, guess: &guess, feedback: &feedback, numberOfGuesses: &numberOfGuesses, computerNumber: &computerNumber, isGameOver: &isGameOver)
-        appleSignInDelegated = false
     }
     
     func newGameWithHardcodedNumber() {
         NumberGuesserGame.newGameWithHardcodedNumber(playerName: &playerName, guess: &guess, feedback: &feedback, numberOfGuesses: &numberOfGuesses, computerNumber: &computerNumber, isGameOver: &isGameOver)
-        appleSignInDelegated = false
     }
     
     
