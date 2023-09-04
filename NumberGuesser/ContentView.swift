@@ -18,92 +18,115 @@ struct ContentView: View {
     
     @Environment(\.managedObjectContext) var managedObjectContext
     
+    private let gradientBackground: LinearGradient = LinearGradient(
+        gradient: Gradient(colors: [Color.blue.opacity(0.2), Color.white]),
+        startPoint: .top,
+        endPoint: .bottom
+    )
+    
     var body: some View {
-        let gradient: Gradient = Gradient(colors: [Color.blue.opacity(0.2), Color.white])
-        let linearGradient: LinearGradient = LinearGradient(gradient: gradient, startPoint: .top, endPoint: .bottom)
-        return NavigationView {
+        NavigationView {
             VStack(spacing: 20) {
-                Text("Number Guesser Game")
-                    .font(.largeTitle)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color.blue)
+                titleText
                 
                 if !isGameOver {
-                    Group {
-                        Text("Enter your name:")
-                        TextField("Name", text: $playerName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                        
-                        Text("Enter your guess:")
-                        TextField("Guess", text: $guess)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                        
-                        Button("Submit Guess", action: checkGuess)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                    
-                    Text("Feedback: \(feedback)")
-                        .font(.headline)
-                        .foregroundColor(.red)
-                    
-                    Text("Number of Guesses: \(numberOfGuesses)")
-                    
-                    NavigationLink(destination: RatingView().environment(\.managedObjectContext, self.managedObjectContext)) {
-                        Text("RATING TABLE")
-                            .font(.title2)
-                            .foregroundColor(Color.blue)
-                            .padding()
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(10)
-                    }
-                    
-                    Button(action: newGameWithHardcodedNumber) {
-                        Text("START A GAME WITH 1234")
-                            .font(.title2)
-                            .fontWeight(.light)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 20)
-                    }
-                    .background(LinearGradient(gradient: Gradient(colors: [Color.purple.opacity(0.6), Color.black]), startPoint: .leading, endPoint: .trailing))
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.purple.opacity(0.7), lineWidth: 2)
-                    )
-                    .shadow(color: .blue.opacity(0.7), radius: 5, x: 0, y: 2)
-                    
-                    
+                    inputSection
+                    feedbackSection
+                    navigationLinkToRating
+                    startGameButton
                 } else {
-                    Text("Game Over!")
-                        .font(.headline)
-                        .padding()
-                    
-                    Text("Your Score: \(Int(userScore))")
-                        .padding()
-                    
-                    Text("Best Score: \(bestScore)")
-                    
-                    Button("Clear database", action: DataController().deleteAllResults)
-                        .padding()
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                    
-                    Button("New Game", action: newGame)
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                    
+                    gameOverSection
                 }
             }
             .padding()
-            .background(linearGradient)
+            .background(gradientBackground)
             .edgesIgnoringSafeArea(.all)
+        }
+    }
+    
+    private var titleText: some View {
+        Text("Number Guesser Game")
+            .font(.largeTitle)
+            .fontWeight(.semibold)
+            .foregroundColor(Color.blue)
+    }
+    
+    private var inputSection: some View {
+        Group {
+            Text("Enter your name:")
+            TextField("Name", text: $playerName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            
+            Text("Enter your guess:")
+            TextField("Guess", text: $guess)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            
+            Button("Submit Guess", action: checkGuess)
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+        }
+    }
+    
+    private var feedbackSection: some View {
+        VStack {
+            Text("Feedback: \(feedback)")
+                .font(.headline)
+                .foregroundColor(.red)
+            
+            Text("Number of Guesses: \(numberOfGuesses)")
+        }
+    }
+    
+    private var navigationLinkToRating: some View {
+        NavigationLink(destination: RatingView().environment(\.managedObjectContext, self.managedObjectContext)) {
+            Text("RATING TABLE")
+                .font(.title2)
+                .foregroundColor(Color.blue)
+                .padding()
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(10)
+        }
+    }
+    
+    private var startGameButton: some View {
+        Button(action: newGameWithHardcodedNumber) {
+            Text("START A GAME WITH 1234")
+                .font(.title2)
+                .fontWeight(.light)
+                .padding(.vertical, 10)
+                .padding(.horizontal, 20)
+        }
+        .background(LinearGradient(gradient: Gradient(colors: [Color.purple.opacity(0.6), Color.black]), startPoint: .leading, endPoint: .trailing))
+        .foregroundColor(.white)
+        .cornerRadius(10)
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.purple.opacity(0.7), lineWidth: 2))
+        .shadow(color: .blue.opacity(0.7), radius: 5, x: 0, y: 2)
+    }
+    
+    private var gameOverSection: some View {
+        VStack {
+            Text("Game Over!")
+                .font(.headline)
+                .padding()
+            
+            Text("Your Score: \(Int(userScore))")
+                .padding()
+            
+            Text("Best Score: \(bestScore)")
+            
+            Button("Clear database", action: DataController().deleteAllResults)
+                .padding()
+                .background(Color.red)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            
+            Button("New Game", action: newGame)
+                .padding()
+                .background(Color.green)
+                .foregroundColor(.white)
+                .cornerRadius(10)
         }
     }
     

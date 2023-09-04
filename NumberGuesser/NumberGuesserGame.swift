@@ -6,38 +6,28 @@
 //
 
 import Foundation
-import CoreData
 
 struct NumberGuesserGame {
     
     @discardableResult
     static func checkGuess(playerName: String, guess: String, computerNumber: String, numberOfGuesses: inout Int, bestScore: inout Int, isGameOver: inout Bool, feedback: inout String, userScore: inout Float) -> Bool {
-        guard guess.count == 4, Set(guess).count == 4 else {
+        
+        guard isValid(guess: guess) else {
             feedback = "Guess must be a 4-digit number without duplicates"
             return false
         }
         
-        var correctDigits = 0
-        var misplacedDigits = 0
-        let userGuess = Array(guess)
-        let computerGuess = Array(computerNumber)
+        let (correctDigits, misplacedDigits) = compareGuesses(userGuess: guess, computerGuess: computerNumber)
         
-        for (index, digit) in userGuess.enumerated() {
-            if digit == computerGuess[index] {
-                correctDigits += 1
-            } else if computerGuess.contains(digit) {
-                misplacedDigits += 1
-            }
-        }
+        numberOfGuesses += 1
+        
         if correctDigits == 4 {
             feedback = "You've guessed the correct number!"
             isGameOver = true
-            numberOfGuesses += 1
             userScore = Float(100 - (numberOfGuesses * 2))
             return true
         } else {
             feedback = "\(correctDigits) + \(misplacedDigits) -"
-            numberOfGuesses += 1
             return false
         }
     }
@@ -45,27 +35,43 @@ struct NumberGuesserGame {
     static func generateComputerNumber() -> String {
         var numbers = Array(0...9)
         numbers.shuffle()
-        let result = numbers.prefix(4).map { String($0) }
-        return result.joined()
+        return numbers.prefix(4).map(String.init).joined()
     }
     
     static func newGame(playerName: inout String, guess: inout String, feedback: inout String, numberOfGuesses: inout Int, computerNumber: inout String, isGameOver: inout Bool) {
-        playerName = ""
-        guess = ""
-        feedback = ""
-        numberOfGuesses = 0
-        computerNumber = generateComputerNumber()
-        isGameOver = false
+        resetGame(for: &playerName, guess: &guess, feedback: &feedback, numberOfGuesses: &numberOfGuesses, computerNumber: &computerNumber, isGameOver: &isGameOver, newNumber: generateComputerNumber())
     }
     
     static func newGameWithHardcodedNumber(playerName: inout String, guess: inout String, feedback: inout String, numberOfGuesses: inout Int, computerNumber: inout String, isGameOver: inout Bool) {
+        resetGame(for: &playerName, guess: &guess, feedback: &feedback, numberOfGuesses: &numberOfGuesses, computerNumber: &computerNumber, isGameOver: &isGameOver, newNumber: "1234")
+    }
+    
+    private static func isValid(guess: String) -> Bool {
+        return guess.count == 4 && Set(guess).count == 4
+    }
+    
+    private static func compareGuesses(userGuess: String, computerGuess: String) -> (Int, Int) {
+        var correctDigits = 0
+        var misplacedDigits = 0
+        let userGuessArray = Array(userGuess)
+        let computerGuessArray = Array(computerGuess)
+        
+        for (index, digit) in userGuessArray.enumerated() {
+            if digit == computerGuessArray[index] {
+                correctDigits += 1
+            } else if computerGuessArray.contains(digit) {
+                misplacedDigits += 1
+            }
+        }
+        return (correctDigits, misplacedDigits)
+    }
+    
+    private static func resetGame(for playerName: inout String, guess: inout String, feedback: inout String, numberOfGuesses: inout Int, computerNumber: inout String, isGameOver: inout Bool, newNumber: String) {
         playerName = ""
         guess = ""
         feedback = ""
         numberOfGuesses = 0
-        computerNumber = "1234"
+        computerNumber = newNumber
         isGameOver = false
     }
 }
-
-
